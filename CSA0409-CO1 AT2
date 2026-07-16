@@ -1,0 +1,155 @@
+1 a) Multiuser operating system is suitable for this kind of environment because, multiuser
+operating system allows multiple user to perform a task at a time in a connected environment.
+As multiple students are allowed to perform program in a shared linux server it is a multiuser 
+operating system.
+
+b) The responsibilities of a kernel in managing multiuser processes is:
+i) process management
+ii) memory management
+
+c)#include <stdio.h>
+#include <unistd.h>
+int main()
+{
+    pid_t pid;
+    pid = fork();
+    if (pid == 0)
+{
+        printf("Child Process ID: %d\n", getpid());
+        printf("Parent Process ID: %d\n", getppid());
+}
+     else if (pid > 0) 
+{
+        printf("Parent Process ID: %d\n", getpid());
+        printf("Child Process ID: %d\n", pid);
+} 
+    else 
+{
+        printf("Fork failed!\n");
+}
+ return 0;
+}
+
+
+2 a) Operation	                         System Call
+file creation/open	                     open() (with O_CREAT flag) or creat()
+write to file                            write()
+read from file                           read()
+close file	                             close()
+
+b)  open()
+i)opens an existing file or creates a new file (using the O_CREAT flag).
+ii)returns a file descriptor that is used for subsequent file operations.
+    write()
+i)writes data from a buffer into a file.
+ii)returns the number of bytes successfully written.
+
+c)#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+int main() 
+{
+    int fd;
+    fd = open("student.txt", O_CREAT | O_WRONLY, 0644);
+    write(fd, "susi\n", strlen("susi\n"));
+    close(fd);
+    return 0;
+}
+
+
+3 a) The required system calls are:
+open() – open the source and destination files.
+read() – read data from the source file.
+write() – write data to the destination file.
+close() – close both files after copying.
+
+b) read()
+i)reads data from the source file into a buffer.
+ii)returns the number of bytes read.
+  write()
+i)writes the data from the buffer into the destination file.
+ii)returns the number of bytes written.
+
+c) #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+int main()
+{
+ int src, dest;
+ char buffer[100];
+ int bytesRead;
+ src = open("source.txt", O_RDONLY)
+ dest = open("destination.txt", O_CREAT | O_WRONLY, 0644);
+ while ((bytesRead = read(src, buffer, sizeof(buffer))) > 0)
+{
+    write(dest, buffer, bytesRead);
+}
+    close(src);
+    close(dest);
+    return 0;
+}
+
+
+4 a) fork()
+i)creates a new child process by duplicating the parent process.
+ii)returns 0 in the child process and the child's Process ID (PID) in the parent process.
+     exec()
+i)replaces the current process with a new program.
+ii)the process ID (PID) remains the same, but the program being executed changes.
+
+b)the wait() system call makes the parent process wait until the child process finishes execution.
+it allows the parent to collect the child's exit status.
+
+c)#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+int main()
+{
+    pid_t pid;
+    pid = fork();   
+    if (pid == 0)
+{
+     execl("/bin/ls", "ls", NULL);
+} 
+    else if (pid > 0) 
+{
+     wait(NULL);
+     printf("Child process completed.\n");
+}
+    else
+{
+    printf("Fork failed!\n");
+}
+ return 0;
+}
+
+
+5 a)File management is an important function of an operating system because it:
+*organizes and stores data efficiently on secondary storage.
+*allows users to create, read, write, rename, and delete files.
+*protects files from unauthorized access using permissions.
+*ensures efficient retrieval and management of stored data.
+
+b) open()
+i)opens an existing file or creates a new file (with appropriate flags).
+ii)returns a file descriptor used for file operations.
+  close()
+i)closes an opened file.
+ii)releases the file descriptor and frees system resources.
+
+c)#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+int main() 
+{
+    int fd;
+    char buffer[100];
+    int bytesRead;
+    fd = open("student.txt", O_RDONLY);
+    bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+    buffer[bytesRead] = '\0';
+    printf("%s", buffer);
+    close(fd);
+    return 0;
+}
