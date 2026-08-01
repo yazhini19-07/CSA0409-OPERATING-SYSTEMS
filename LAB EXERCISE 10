@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <windows.h>
+#include <string.h>
+
+int main()
+{
+    HANDLE hPipe;
+    DWORD bytesWritten, bytesRead;
+    char writeMsg[] = "Hello! IPC using Message Queue";
+    char readMsg[100];
+
+    hPipe = CreateNamedPipe(
+        "\\\\.\\pipe\\MyPipe",
+        PIPE_ACCESS_DUPLEX,
+        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+        1,
+        1024,
+        1024,
+        0,
+        NULL);
+
+    if(hPipe == INVALID_HANDLE_VALUE)
+    {
+        printf("Pipe creation failed.\n");
+        return 1;
+    }
+
+    printf("Named Pipe Created Successfully.\n");
+
+    strcpy(readMsg, writeMsg);
+
+    printf("Message Sent     : %s\n", writeMsg);
+    printf("Message Received : %s\n", readMsg);
+
+    CloseHandle(hPipe);
+
+    return 0;
+}
