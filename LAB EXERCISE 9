@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <windows.h>
+#include <string.h>
+
+int main()
+{
+    HANDLE hMapFile;
+    char *pBuf;
+
+    hMapFile = CreateFileMapping(
+        INVALID_HANDLE_VALUE,
+        NULL,
+        PAGE_READWRITE,
+        0,
+        1024,
+        "SharedMemory");
+
+    if (hMapFile == NULL)
+    {
+        printf("Shared memory creation failed.\n");
+        return 1;
+    }
+
+    pBuf = (char *)MapViewOfFile(
+        hMapFile,
+        FILE_MAP_ALL_ACCESS,
+        0,
+        0,
+        1024);
+
+    if (pBuf == NULL)
+    {
+        printf("Memory mapping failed.\n");
+        CloseHandle(hMapFile);
+        return 1;
+    }
+
+    strcpy(pBuf, "Hello! This is Shared Memory IPC.");
+
+    printf("Message Written : %s\n", pBuf);
+
+    printf("Message Read    : %s\n", pBuf);
+
+    UnmapViewOfFile(pBuf);
+    CloseHandle(hMapFile);
+
+    return 0;
+}
