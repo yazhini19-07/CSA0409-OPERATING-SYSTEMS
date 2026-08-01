@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <windows.h>
+
+int main()
+{
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    if (CreateProcess(
+            "C:\\Windows\\System32\\notepad.exe",
+            NULL,
+            NULL,
+            NULL,
+            FALSE,
+            0,
+            NULL,
+            NULL,
+            &si,
+            &pi))
+    {
+        printf("New process created successfully.\n");
+        printf("Current Process ID : %lu\n", GetCurrentProcessId());
+        printf("New Process ID     : %lu\n", pi.dwProcessId);
+        printf("Parent Process ID  : Not directly available in Windows API\n");
+
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    }
+    else
+    {
+        printf("Process creation failed.\n");
+    }
+
+    return 0;
+}
