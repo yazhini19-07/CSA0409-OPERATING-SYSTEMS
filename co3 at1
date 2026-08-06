@@ -1,0 +1,176 @@
+QUESTION 1:
+#include <stdio.h>
+int main()
+{
+    int base, limit, logicalAddress, physicalAddress;
+    printf("Enter Base Register value: ");
+    scanf("%d", &base);
+    printf("Enter Limit Register value: ");
+    scanf("%d", &limit);
+    printf("Enter Logical Address: ");
+    scanf("%d", &logicalAddress);
+    if (logicalAddress >= 0 && logicalAddress < limit)
+    {
+        physicalAddress = base + logicalAddress;
+        printf("Valid Logical Address\n");
+        printf("Physical Address = %d\n", physicalAddress);
+    }
+    else
+    {
+        printf("Invalid Logical Address! Address Trap.\n");
+    }
+    return 0;
+}
+
+OUTPUT:
+Enter Base Register value: 1000
+Enter Limit Register value: 500
+Enter Logical Address: 250
+Valid Logical Address
+Physical Address = 1250
+
+QUESTION 2:
+#include <stdio.h>
+int main()
+{
+    int pageSize, pageTable[10];
+    int pages, pageNo, offset, frameNo, physicalAddress, i;
+    printf("Enter Page Size: ");
+    scanf("%d", &pageSize);
+    printf("Enter Number of Pages: ");
+    scanf("%d", &pages);
+    for(i = 0; i < pages; i++)
+      {
+        printf("Frame for Page %d: ", i);
+        scanf("%d", &pageTable[i]);
+    }
+    printf("Enter Page Number: ");
+    scanf("%d", &pageNo);
+    printf("Enter Offset: ");
+    scanf("%d", &offset);
+    if(pageNo < pages && offset < pageSize)
+    {
+        frameNo = pageTable[pageNo];
+        physicalAddress = frameNo * pageSize + offset;
+
+        printf("Frame Number = %d\n", frameNo);
+        printf("Physical Address = %d\n", physicalAddress);
+    }
+    else
+    {
+        printf("Invalid Address\n");
+    }
+    return 0;
+}
+
+OUTPUT:
+Enter Page Size: 100
+Enter Number of Pages: 3
+Frame for Page 0: 5
+Frame for Page 1: 2
+Frame for Page 2: 8
+Enter Page Number: 1
+Enter Offset: 20
+Frame Number = 2
+Physical Address = 220
+
+QUESTION 3:
+#include <stdio.h>
+int main()
+{
+    int pt[10], n, p, offset, size, frame, pa, i;
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+    printf("Enter page size: ");
+    scanf("%d", &size);
+    for(i = 0; i < n; i++)
+    {
+        printf("Frame for Page %d: ", i);
+        scanf("%d", &pt[i]);
+    }
+    printf("Enter Page Number: ");
+    scanf("%d", &p);
+    printf("Enter Offset: ");
+    scanf("%d", &offset);
+    if(p < n && offset < size)
+    {
+        frame = pt[p];
+        pa = frame * size + offset;
+        printf("Frame Number = %d\n", frame);
+        printf("Physical Address = %d\n", pa);
+    }
+    else
+    {
+        printf("Invalid Address");
+    }
+    return 0;
+}
+
+OUTPUT:
+Enter number of pages: 3
+Enter page size: 100
+Frame for Page 0: 4
+Frame for Page 1: 2
+Frame for Page 2: 5
+Enter Page Number: 1
+Enter Offset: 20
+Frame Number = 2
+Physical Address = 220
+
+QUESTION 4:
+#include <stdio.h>
+int main()
+{
+    float memoryTime, tlbTime, hitRatio;
+    float withoutTLB, withTLB;
+    printf("Enter Memory Access Time: ");
+    scanf("%f", &memoryTime);
+    printf("Enter TLB Access Time: ");
+    scanf("%f", &tlbTime);
+    printf("Enter TLB Hit Ratio (0 to 1): ");
+    scanf("%f", &hitRatio);
+    withoutTLB = 2 * memoryTime;
+    withTLB = hitRatio * (tlbTime + memoryTime) +
+              (1 - hitRatio) * (tlbTime + 2 * memoryTime);
+    printf("\nMemory Access Time without TLB = %.2f\n", withoutTLB);
+    printf("Effective Memory Access Time with TLB = %.2f\n", withTLB);
+    return 0;
+}
+
+OUTPUT:
+Enter Memory Access Time: 100
+Enter TLB Access Time: 20
+Enter TLB Hit Ratio (0 to 1): 0.8
+Memory Access Time without TLB = 200.00
+Effective Memory Access Time with TLB = 140.00
+
+QUESTION 5:
+#include <stdio.h>
+int main()
+{
+    int base, limit, address;
+    printf("Enter Base Register value: ");
+    scanf("%d", &base);
+    printf("Enter Limit Register value: ");
+    scanf("%d", &limit);
+    printf("Enter Logical Address: ");
+    scanf("%d", &address);
+    if(address >= 0 && address < limit)
+    {
+        printf("Valid Address\n");
+        printf("Physical Address = %d", base + address);
+    }
+    else
+    {
+        printf("Invalid Address\n");
+        printf("Access Denied!");
+    }
+    return 0;
+}
+
+OUTPUT:
+Enter Base Register value: 1000
+Enter Limit Register value: 500
+Enter Logical Address: 200
+Valid Address
+Physical Address = 1200
