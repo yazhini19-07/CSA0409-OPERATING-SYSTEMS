@@ -1,0 +1,267 @@
+Q1: OPTIMIZED LINUX FILE SYSTEM LAYOUT FOR A 50 GB SERVER 
+ANALYSIS:
+i)The server stores rapidly growing system logs, user files, and application data. 
+ii)If all directories are kept in one partition, growing logs may consume the entire disk and prevent critical services from writing files.
+iii)Therefore, separate partitions/filesystems should be used.
+
+PROPOSED 50 GB LAYOUT:
+ Partition        Size               Purpose                                  
+ /                8 GB              Linux OS, binaries and libraries          
+ /var            12 GB              Logs, cache and variable application data 
+ /home           18 GB              User files                                
+ /tmp             2 GB              Temporary files                           
+ swaP             4 GB              Virtual memory                            
+ Free/Reserve     6 GB              Future expansion and emergency space      
+ **Total**       **50 GB**  
+
+LOG MANAGEMENT:
+Since log files must not exceed 10 GB, /var can be configured with:
+i)logrotate for automatic rotation.
+ii)Compression of old logs.
+iii)Maximum number/size of rotated logs.
+iv)Removal of old logs after a defined retention period.
+v)Monitoring using df, du, and system monitoring tools.
+Example: /etc/logrotate.conf settings can rotate logs daily and compress old files.
+
+SUITABLE FILE SYSTEMS:
+i)ext4 can be used for /, /home, and /var.
+ii)Swap partition is used for virtual memory.
+iii)If future expansion is important, LVM can be used instead of fixed partitions.
+
+ADVANTAGES:
+i)A rapidly growing /var does not consume /home or /.
+ii)System services continue operating even when logs grow.
+iii)Log rotation prevents disk exhaustion.
+iv)LVM allows partitions to be extended when required.
+v)Reserved free space provides protection against sudden growth.
+
+CONCLUSION:
+A separate /var partition with log rotation and monitoring, combined with LVM and reserved space, provides efficient disk utilization 
+and prevents log growth from interrupting critical Linux services.
+
+
+Q2: REDUCING CONTEXT SWITCHING DELAYS IN A HIGH-CPU LINUX SYSTEMS
+ANALYSIS:
+i)Frequent context switching occurs when the CPU repeatedly changes from one process/thread to another.
+ii)This introduces scheduling overhead and can negatively affect real-time applications.
+
+PROPOSED OPTIMIZATIONS:
+1. CPU Affinity
+Assign important processes to specific CPUs using:
+taskset -c 2,3 ./realtime_app
+
+2. Real-Time Scheduling
+Linux provides real-time scheduling policies such as:
+i)SCHED_FIFO
+ii)SCHED_RR
+For example:
+chrt -f 80 ./realtime_app
+
+3. Kernel Modules
+Unnecessary kernel modules can be unloaded:
+lsmod
+sudo modprobe -r module_name
+
+4. Interrupt Affinity
+Hardware interrupts can be distributed appropriately between CPU cores so that one CPU does not become overloaded.
+
+5. PREEMPT_RT Kernel
+For strict real-time workloads, a Linux kernel configured with PREEMPT_RT can reduce scheduling latency and improve predictability.
+
+OTHER USEFUL TECHNIQUES:
+i)Disable unnecessary background services.
+ii)Tune scheduler parameters where appropriate.
+iii)Use CPU isolation for critical real-time workloads.
+iv)Monitor context switches using tools such as vmstat and pidstat.
+
+RESULT:
+These techniques reduce unnecessary context switching, improve CPU utilization, and provide more predictable response 
+times for real-time applications.
+
+CONCLUSION:CPU affinity + real-time scheduling + interrupt management + appropriate kernel configuration provides an 
+effective software-only solution when hardware upgrades are unavailable.
+
+
+Q3: PROCESSING 1 MILLION LOG ENTRIES WITHIN 2 MINUTES
+ANALYSIS:
+i)Processing one million entries using inefficient shell commands repeatedly can take a long time.
+ii)The solution should minimize process creation, unnecessary disk I/O, and repeated scanning.
+
+OPTIMIZED SHELL SCRIPT:
+CODE:
+LOGFILE="system.log"
+if [ ! -f "$LOGFILE" ]; then
+    echo "Log file not found"
+    exit 1
+fi
+echo "Total log entries:"
+wc -l < "$LOGFILE"
+echo
+echo "ERROR entries:"
+grep -c "ERROR" "$LOGFILE"
+echo
+echo "WARNING entries:"
+grep -c "WARNING" "$LOGFILE"
+echo
+echo "Top 10 IP addresses:"
+awk '{print $1}' "$LOGFILE" | sort | uniq -c | sort -nr | head -10
+echo
+echo "Processing completed."
+A combination of awk, grep, sort, and wc can efficiently process large log files.
+
+EXPLANATION OF COMMANDS:
+Command                   	Purpose
+wc -l	                      Counts log entries
+grep -c	                    Counts matching entries
+awk	                        Extracts required fields
+sort	                      Sorts extracted data
+uniq -c	                    Counts duplicate values
+head	                      Displays only required results
+
+PERFORMANCE OPTIMIZATION:
+Instead of executing a separate command for every line, awk processes the file sequentially.
+For example:
+awk '$0 ~ /ERROR/ {count++} END {print count}' system.log
+This avoids unnecessary shell loops such as:
+while read line
+do
+    ...
+done
+for one million lines.
+
+WHY THESE COMMANDS ARE SUITABLE:
+i)awk is efficient for large text files.
+ii)grep performs fast pattern matching.
+iii)sort and uniq efficiently handle aggregation.
+iv)Shell built-ins and pipelines reduce unnecessary scripting overhead.
+v)Processing can be performed using streaming instead of loading the complete file into memory.
+
+RESULT:
+The script is designed to process a large log file efficiently and can complete within the required 2-minute target, depending
+on disk speed, CPU performance, log format, and the complexity of the operations.
+
+
+Q4: MANAGING A FAULT PROCESS CONSUMING 90% OF CPU
+STEP 1:
+Use:
+top
+or:
+ps aux --sort=-%cpu | head
+This displays processes in descending CPU usage.
+
+Step 2: 
+Monitor the Process
+pidstat -p PID 1
+This monitors CPU usage of the selected process.
+
+Step 3: 
+Reduce Its Priority
+If the process is not critical:
+sudo renice 10 -p PID
+A higher nice value gives the process lower CPU scheduling priority.
+
+Step 4: Control Using systemd
+For a service, resource limits can be applied using systemd.
+Example:
+sudo systemctl edit service_name
+
+A CPU LIMIT CAN BE CONFIGURED USING:
+[Service]
+CPUQuota=20%
+Then:
+sudo systemctl daemon-reload
+sudo systemctl restart service_name
+
+Step 5: Terminate If Necessary
+If the process is faulty and continues consuming resources:
+kill PID
+If it does not respond:
+kill -9 PID
+kill -9 should be used only as a last resort.
+
+PROTECTING CRITICAL SERVICES:
+Linux cgroups/systemd resource controls can restrict the faulty service while allowing important services to continue operating.
+For example:
+Web server → protected
+Database → protected
+Faulty background process → CPU limited
+
+USEFUL COMMANDS:
+top
+ps
+pidstat
+renice
+kill
+systemctl
+
+CONCLUSION:
+The recommended approach is:
+Identify → Monitor → Reduce priority/limit CPU → Terminate if necessary
+This controls the faulty process without restarting the entire system and protects critical services. 
+
+
+Q5.RAM ALLOCATION FOR 5 VIRTUAL MACHINES
+GIVEN:
+Total physical RAM = 16 GB
+Host OS requirement = 4 GB
+Number of VMs = 5
+Minimum RAM per VM = 2 GB
+
+CALCULATION:
+RAM available for VMs:
+16−4=12 GB
+RAM required by 5 VMs:
+5×2=10 GB
+Remaining RAM:
+12−10=2 GB
+Therefore, the minimum allocation is feasible.
+
+PROPOSED ALLOCATION:
+Component              	RAM
+Host OS               	4 GB
+VM 1	                  2 GB
+VM 2	                  2 GB
+VM 3	                  2 GB
+VM 4	                  2 GB
+VM 5	                  2 GB
+Remaining	2 GB
+Total	16 GB
+
+VIRTUALIZATION STRATEGY:
+Use a hypervisor such as KVM/QEMU.
+Each VM receives at least 2 GB:
+Host OS
+  │
+  ├── VM1 → 2 GB
+  ├── VM2 → 2 GB
+  ├── VM3 → 2 GB
+  ├── VM4 → 2 GB
+  └── VM5 → 2 GB
+The remaining 2 GB should preferably be kept as host reserve rather than immediately assigning it to the VMs.
+
+MEMORY OPTIMIZATION:
+1. Memory Ballooning:
+Virtualization systems can use memory ballooning to dynamically adjust VM memory based on demand.
+
+2. KSM:
+Kernel Same-page Merging (KSM) can identify identical memory pages used by VMs and share them, reducing physical RAM usage.
+
+3. Avoid Excessive Overcommit:
+Because only 2 GB remains after minimum allocation, aggressive memory overcommit should be avoided. The minimum 2 GB requirement for each VM must always be maintained.
+
+4. Monitor Memory Usage:
+Commands such as:
+free -h
+and:
+virsh dommemstat VM1
+can be used to monitor memory utilization.
+
+RESULT:
+The five VMs can run because:
+4+(5×2)=14 GB
+leaving:
+16−14=2 GB
+for the host's additional needs.
+
+CONCLUSION:
+The most efficient safe strategy is to allocate 4 GB to the host and 2 GB minimum to each VM, while keeping the remaining 2 GB as reserve. Ballooning and KSM can further optimize memory usage when workload demands change.
