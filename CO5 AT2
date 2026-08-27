@@ -1,0 +1,112 @@
+1)File System Space Management Algorithm
+Aim: To monitor disk usage and automatically delete/compress log files when disk utilization exceeds 80%.
+
+Pseudocode:
+BEGIN
+SET threshold = 80%
+usage = GET_DISK_USAGE()
+IF usage > threshold THEN
+    log_files = GET_LOG_FILES()
+    SORT log_files BY size DESCENDING
+    FOR each file IN log_files DO
+        DELETE OR COMPRESS file
+        usage = GET_DISK_USAGE()
+        IF usage <= threshold THEN
+            BREAK
+        ENDIF
+    ENDFOR
+ENDIF
+END
+
+Result:
+The algorithm monitors disk utilization and automatically removes or compresses large log files until disk usage falls to 80% or below.
+
+
+2)Priority-Based CPU Scheduling Algorithm
+Aim: To improve CPU efficiency by selecting and executing processes based on their priority levels.
+
+Pseudocode:
+BEGIN
+INPUT process_list
+SORT process_list BY priority (highest first)
+WHILE process_list IS NOT EMPTY DO
+    SELECT process WITH highest priority
+    ALLOCATE CPU TIME
+    EXECUTE process
+    IF process IS NOT COMPLETED THEN
+        REDUCE priority slightly
+        ADD process BACK TO process_list
+        SORT process_list BY priority
+    ELSE
+        REMOVE process FROM process_list
+    ENDIF
+ENDWHILE
+END
+
+Result:
+The priority-based scheduling algorithm executes high-priority processes first and gradually reduces the priority of unfinished processes to provide fair
+CPU utilization.
+
+
+3)RAM Resource Management Among Virtual Machines
+Aim: To efficiently allocate and distribute RAM among multiple virtual machines while maintaining balanced performance.
+
+Pseudocode:
+BEGIN
+SET total_RAM = 16 GB
+SET host_reserved = 4 GB
+available_RAM = total_RAM - host_reserved
+INPUT number_of_VMs
+SET min_RAM = 2 GB
+FOR i = 1 TO number_of_VMs DO
+    IF available_RAM >= min_RAM THEN
+        ALLOCATE min_RAM TO VM[i]
+        available_RAM = available_RAM - min_RAM
+    ELSE
+        PRINT "Insufficient memory"
+    ENDIF
+ENDFOR
+PRINT "Remaining RAM =", available_RAM
+END
+
+Result:
+The algorithm reserves 4 GB for the host system and allocates a minimum of 2 GB RAM to each virtual machine whenever sufficient memory is available.
+
+
+4)Hypervisor Selection
+Aim: To select the most appropriate hypervisor based on performance requirements, budget, and hardware access.
+
+Pseudocode:
+BEGIN
+INPUT performance_required, budget, hardware_access
+IF performance_required = HIGH AND hardware_access = TRUE THEN
+    SELECT Type_1_Hypervisor
+ELSE IF budget = LOW THEN
+    SELECT Type_2_Hypervisor
+ELSE
+    SELECT Type_1_Hypervisor
+ENDIF
+PRINT selected_hypervisor
+END
+
+Result:
+The algorithm selects a suitable hypervisor based on performance, budget, and hardware requirements.
+
+
+5)CPU and Memory Resource Limiting
+Aim: To regulate CPU and memory usage of applications using suitable resource-limiting mechanisms.
+
+Pseudocode:
+BEGIN
+INPUT application_list
+FOR each app IN application_list DO
+    CREATE cgroup FOR app
+    SET CPU limit
+    SET memory limit
+    ASSIGN process TO cgroup
+ENDFOR
+PRINT "CPU and memory limits applied"
+END
+
+Result:
+The algorithm creates a control group for each application and assigns CPU and memory limits to ensure balanced and efficient resource utilization.
